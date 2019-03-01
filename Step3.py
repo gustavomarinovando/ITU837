@@ -47,8 +47,8 @@ LonT_c = LonT_T[0].tolist()
 
 print("Enter your desired latitude and longitude")
 
-lat = 3.133
-lon = 101.7
+lat = 22.9
+lon = -43.23
 
 # lat = float(input())
 # lon = float(input())
@@ -96,26 +96,18 @@ else:
 print("The closest numbers to", lat, "are:", MTLat_B, "and", MTLat_T, "and their positions are",
       pos_lat_b, "and", pos_lat_t)
 
-m1 = MTLat_T - lat
-m2 = lat - MTLat_B
-m3 = MTLon_R - lon
-m4 = lon - MTLon_L
+i1 = MTJan.loc[pos_lat_b, pos_lon_l]
+i2 = MTJan.loc[pos_lat_t, pos_lon_l]
+i3 = MTJan.loc[pos_lat_b, pos_lon_r]
+i4 = MTJan.loc[pos_lat_t, pos_lon_r]
 
-# i1 = MTJan.loc[pos_lon_l, pos_lat_b]
-# i2 = MTJan.loc[pos_lon_l, pos_lat_t]
-# i3 = MTJan.loc[pos_lon_r, pos_lat_b]
-# i4 = MTJan.loc[pos_lon_r, pos_lat_t]
-#
-# MTF = i1*m1*m3 + i2*m2*m3 + i3*m1*m4 + i4*m2*m4
+t = (lat - MTLat_B)/(MTLat_T-MTLat_B)
+s = (lon - MTLon_L)/(MTLon_R - MTLon_L)
 
 # Final value of MT
-# print("MT = ", MTF)
+MTF = (1 - s)*(1 - t)*i1 + (1 - s)*t*i2 + s*(1 - t)*i3 + t*s*i4
 
-# print("Surrounding values:", MTJan.loc[pos_lon_l, pos_lat_t], MTJan.loc[pos_lon_r, pos_lat_t],
-#      MTJan.loc[pos_lon_l, pos_lat_b], MTJan.loc[pos_lon_r, pos_lat_b])
-# print(MTJan)
+print("MT = ", MTF)
 
-print(MTJan)
-print(MTJan.loc[721, 1441])
-print(len(LatMT_c))
-print(len(LonMT_c))
+print("Surrounding values:", MTJan.loc[pos_lat_t, pos_lon_l], MTJan.loc[pos_lat_t, pos_lon_r],
+      MTJan.loc[pos_lat_b, pos_lon_l], MTJan.loc[pos_lat_b, pos_lon_r])
