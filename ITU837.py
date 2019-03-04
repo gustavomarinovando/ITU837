@@ -1,5 +1,6 @@
 import datetime
 import pandas as pd
+from math import *
 
 # Time of the month selection
 now = datetime.datetime.now()
@@ -51,6 +52,9 @@ LonMT_c = LonMT_T[0].tolist()
 
 LatT_c = LatT[0].tolist()
 LonT_c = LonT_T[0].tolist()
+
+T_Data = [TJan, TFeb, TMar, TApr, TMay, TJun, TJul, TAug, TSep, TOct, TNov, TDec]
+MT_Data = [MTJan, MTFeb, MTMar, MTApr, MTMay, MTJun, MTJul, MTAug, MTSep, MTOct, MTNov, MTDec]
 
 # Data Input
 
@@ -106,22 +110,23 @@ else:
 print("The closest numbers to", lat, "are:", TLat_B, "and", TLat_T, "and their positions are",
       T_pos_lat_b, "and", T_pos_lat_t)
 
-i1 = TJan.loc[T_pos_lat_b, T_pos_lon_l]
-i2 = TJan.loc[T_pos_lat_t, T_pos_lon_l]
-i3 = TJan.loc[T_pos_lat_b, T_pos_lon_r]
-i4 = TJan.loc[T_pos_lat_t, T_pos_lon_r]
+T_i1 = TJan.loc[T_pos_lat_b, T_pos_lon_l]
+T_i2 = TJan.loc[T_pos_lat_t, T_pos_lon_l]
+T_i3 = TJan.loc[T_pos_lat_b, T_pos_lon_r]
+T_i4 = TJan.loc[T_pos_lat_t, T_pos_lon_r]
 
-t = (lat - TLat_B)/(TLat_T-TLat_B)
-s = (lon - TLon_L)/(TLon_R - TLon_L)
+T_t = (lat - TLat_B)/(TLat_T-TLat_B)
+T_s = (lon - TLon_L)/(TLon_R - TLon_L)
 
-# Final value of MT
-TF = (1 - s)*(1 - t)*i1 + (1 - s)*t*i2 + s*(1 - t)*i3 + t*s*i4 - 273.15
+# Final value of T
+TF = (1 - T_s)*(1 - T_t)*T_i1 + (1 - T_s)*T_t*T_i2 + T_s*(1 - T_t)*T_i3 + T_t*T_s*T_i4
 
-print("T = ", TF)
+print("T = ", TF, "K")
 
-print("Surrounding values:", TJan.loc[T_pos_lat_t, T_pos_lon_l], TJan.loc[T_pos_lat_t, T_pos_lon_r],
+print("It's Surrounding values are:", TJan.loc[T_pos_lat_t, T_pos_lon_l], TJan.loc[T_pos_lat_t, T_pos_lon_r],
       TJan.loc[T_pos_lat_b, T_pos_lon_l], TJan.loc[T_pos_lat_b, T_pos_lon_r])
 
+# Step 3
 
 # Longitude MT
 LonMT_CV = min(LonMT_c, key=lambda x: abs(x-lon))
@@ -140,9 +145,6 @@ else:
     MTLon_R = LonMT_c[MT_pos_lon_r]
     MTLon_L = LonMT_c[MT_pos_lon_l]
 
-print("The closest numbers to", lon, "are:", MTLon_L, "and", MTLon_R, "and their positions are",
-      MT_pos_lon_l, "and", MT_pos_lon_r)
-
 # Latitude MT
 LatMT_CV = min(LonMT_c, key=lambda x: abs(x-lat))
 MT_pos_lat = LatMT_c.index(LatMT_CV)
@@ -160,22 +162,36 @@ else:
     MTLat_T = LatMT_c[MT_pos_lat_t]
     MTLat_B = LatMT_c[MT_pos_lat_b]
 
-print("The closest numbers to", lat, "are:", MTLat_B, "and", MTLat_T, "and their positions are",
-      MT_pos_lat_b, "and", MT_pos_lat_t)
+MT_i1 = MTJan.loc[MT_pos_lat_b, MT_pos_lon_l]
+MT_i2 = MTJan.loc[MT_pos_lat_t, MT_pos_lon_l]
+MT_i3 = MTJan.loc[MT_pos_lat_b, MT_pos_lon_r]
+MT_i4 = MTJan.loc[MT_pos_lat_t, MT_pos_lon_r]
 
-i1 = MTJan.loc[MT_pos_lat_b, MT_pos_lon_l]
-i2 = MTJan.loc[MT_pos_lat_t, MT_pos_lon_l]
-i3 = MTJan.loc[MT_pos_lat_b, MT_pos_lon_r]
-i4 = MTJan.loc[MT_pos_lat_t, MT_pos_lon_r]
-
-t = (lat - MTLat_B)/(MTLat_T-MTLat_B)
-s = (lon - MTLon_L)/(MTLon_R - MTLon_L)
+MT_t = (lat - MTLat_B)/(MTLat_T-MTLat_B)
+MT_s = (lon - MTLon_L)/(MTLon_R - MTLon_L)
 
 # Final value of MT
-MTF = (1 - s)*(1 - t)*i1 + (1 - s)*t*i2 + s*(1 - t)*i3 + t*s*i4
+MTF = (1 - MT_s)*(1 - MT_t)*MT_i1 + (1 - MT_s)*MT_t*MT_i2 + MT_s*(1 - MT_t)*MT_i3 + MT_t*MT_s*MT_i4
 
 print("MT = ", MTF)
 
-print("Surrounding values:", MTJan.loc[MT_pos_lat_t, MT_pos_lon_l], MTJan.loc[MT_pos_lat_t, MT_pos_lon_r],
+print("It's Surrounding values are:", MTJan.loc[MT_pos_lat_t, MT_pos_lon_l], MTJan.loc[MT_pos_lat_t, MT_pos_lon_r],
       MTJan.loc[MT_pos_lat_b, MT_pos_lon_l], MTJan.loc[MT_pos_lat_b, MT_pos_lon_r])
+
+# Step 4
+
+tii = TF - 273.15
+print("tii = ", tii, "°C")
+
+# Step 5
+
+if tii >= 0:
+    rii = 0.5874*exp(0.0883*tii)
+else:
+    rii = 0.5874
+
+print("rii = ", rii)
+
+# Step 6a
+
 
