@@ -110,10 +110,10 @@ else:
 print("The closest numbers to", lat, "are:", TLat_B, "and", TLat_T, "and their positions are",
       T_pos_lat_b, "and", T_pos_lat_t)
 
-T_i1 = TJan.loc[T_pos_lat_b, T_pos_lon_l]
-T_i2 = TJan.loc[T_pos_lat_t, T_pos_lon_l]
-T_i3 = TJan.loc[T_pos_lat_b, T_pos_lon_r]
-T_i4 = TJan.loc[T_pos_lat_t, T_pos_lon_r]
+T_i1 = T_Data[month-1].loc[T_pos_lat_b, T_pos_lon_l]
+T_i2 = T_Data[month-1].loc[T_pos_lat_t, T_pos_lon_l]
+T_i3 = T_Data[month-1].loc[T_pos_lat_b, T_pos_lon_r]
+T_i4 = T_Data[month-1].loc[T_pos_lat_t, T_pos_lon_r]
 
 T_t = (lat - TLat_B)/(TLat_T-TLat_B)
 T_s = (lon - TLon_L)/(TLon_R - TLon_L)
@@ -123,8 +123,7 @@ TF = (1 - T_s)*(1 - T_t)*T_i1 + (1 - T_s)*T_t*T_i2 + T_s*(1 - T_t)*T_i3 + T_t*T_
 
 print("T = ", TF, "K")
 
-print("It's Surrounding values are:", TJan.loc[T_pos_lat_t, T_pos_lon_l], TJan.loc[T_pos_lat_t, T_pos_lon_r],
-      TJan.loc[T_pos_lat_b, T_pos_lon_l], TJan.loc[T_pos_lat_b, T_pos_lon_r])
+print("It's Surrounding values are:", T_i2, T_i3, T_i1, T_i4)
 
 # Step 3
 
@@ -162,10 +161,10 @@ else:
     MTLat_T = LatMT_c[MT_pos_lat_t]
     MTLat_B = LatMT_c[MT_pos_lat_b]
 
-MT_i1 = MTJan.loc[MT_pos_lat_b, MT_pos_lon_l]
-MT_i2 = MTJan.loc[MT_pos_lat_t, MT_pos_lon_l]
-MT_i3 = MTJan.loc[MT_pos_lat_b, MT_pos_lon_r]
-MT_i4 = MTJan.loc[MT_pos_lat_t, MT_pos_lon_r]
+MT_i1 = MT_Data[month-1].loc[MT_pos_lat_b, MT_pos_lon_l]
+MT_i2 = MT_Data[month-1].loc[MT_pos_lat_t, MT_pos_lon_l]
+MT_i3 = MT_Data[month-1].loc[MT_pos_lat_b, MT_pos_lon_r]
+MT_i4 = MT_Data[month-1].loc[MT_pos_lat_t, MT_pos_lon_r]
 
 MT_t = (lat - MTLat_B)/(MTLat_T-MTLat_B)
 MT_s = (lon - MTLon_L)/(MTLon_R - MTLon_L)
@@ -175,8 +174,7 @@ MTF = (1 - MT_s)*(1 - MT_t)*MT_i1 + (1 - MT_s)*MT_t*MT_i2 + MT_s*(1 - MT_t)*MT_i
 
 print("MT = ", MTF)
 
-print("It's Surrounding values are:", MTJan.loc[MT_pos_lat_t, MT_pos_lon_l], MTJan.loc[MT_pos_lat_t, MT_pos_lon_r],
-      MTJan.loc[MT_pos_lat_b, MT_pos_lon_l], MTJan.loc[MT_pos_lat_b, MT_pos_lon_r])
+print("It's Surrounding values are:", MT_i2, MT_i3, MT_i1, MT_i4)
 
 # Step 4
 
@@ -194,4 +192,37 @@ print("rii = ", rii)
 
 # Step 6a
 
+T_i1_1 = [0] * 12
+T_i2_1 = [0] * 12
+T_i3_1 = [0] * 12
+T_i4_1 = [0] * 12
+Tii = [0] * 12
+
+MT_i1_1 = [0] * 12
+MT_i2_1 = [0] * 12
+MT_i3_1 = [0] * 12
+MT_i4_1 = [0] * 12
+MTii = [0] * 12
+
+for aux_month in range(0, 12):
+
+    T_i1_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_b, T_pos_lon_l]
+    T_i2_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_t, T_pos_lon_l]
+    T_i3_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_b, T_pos_lon_r]
+    T_i4_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_t, T_pos_lon_r]
+    
+    MT_i1_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_b, MT_pos_lon_l]
+    MT_i2_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_t, MT_pos_lon_l]
+    MT_i3_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_b, MT_pos_lon_r]
+    MT_i4_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_t, MT_pos_lon_r]
+
+    Tii[aux_month] = ((1 - T_s) * (1 - T_t) * T_i1_1[aux_month] + (1 - T_s) * T_t * T_i2_1[aux_month] +
+                      T_s * (1 - T_t) * T_i3_1[aux_month] + T_t * T_s * T_i4_1[aux_month]) - 273.15
+    
+    MTii[aux_month] = ((1 - MT_s) * (1 - MT_t) * MT_i1_1[aux_month] + (1 - MT_s) * MT_t * MT_i2_1[aux_month] +
+                       MT_s * (1 - MT_t) * MT_i3_1[aux_month] + MT_t * MT_s * MT_i4_1[aux_month])
+
+print(Tii[month-1])
+
+print(MTii[month-1])
 
