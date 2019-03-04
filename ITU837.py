@@ -65,8 +65,7 @@ lon = float(input())
 
 # Step 1
 
-NoD = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-Nii = NoD[month]
+Nii = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 # Step 2
 
@@ -203,6 +202,8 @@ MT_i2_1 = [0] * 12
 MT_i3_1 = [0] * 12
 MT_i4_1 = [0] * 12
 MTii = [0] * 12
+rii = [0] * 12
+P0ii = [0] * 12
 
 for aux_month in range(0, 12):
 
@@ -222,7 +223,23 @@ for aux_month in range(0, 12):
     MTii[aux_month] = ((1 - MT_s) * (1 - MT_t) * MT_i1_1[aux_month] + (1 - MT_s) * MT_t * MT_i2_1[aux_month] +
                        MT_s * (1 - MT_t) * MT_i3_1[aux_month] + MT_t * MT_s * MT_i4_1[aux_month])
 
+    if Tii[aux_month] >= 0:
+        rii[aux_month] = 0.5874*exp(0.0883*Tii[aux_month])
+    else:
+        rii[aux_month] = 0.5874
+
+    P0ii[aux_month] = (100 * MTii[aux_month]) / (24 * Nii[aux_month] * rii[aux_month])
+
 print(Tii[month-1])
 
 print(MTii[month-1])
 
+print(rii[month-1])
+
+print(P0ii[month-1])
+
+# Step 6b
+
+P0an = [0]*12
+
+# for aux_month_1 in range (0,12):
