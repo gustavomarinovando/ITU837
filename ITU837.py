@@ -2,11 +2,6 @@ import datetime
 import pandas as pd
 from math import *
 
-# Time of the month selection
-now = datetime.datetime.now()
-
-month = now.month
-
 # Data Loading
 
 # Latitude and Longitude of the Monthly Mean Total Rainfall
@@ -41,17 +36,26 @@ TSep = pd.read_csv('Data/T_Month09.TXT', sep=" ", header=None)
 TOct = pd.read_csv('Data/T_Month10.TXT', sep=" ", header=None)
 TNov = pd.read_csv('Data/T_Month11.TXT', sep=" ", header=None)
 TDec = pd.read_csv('Data/T_Month12.TXT', sep=" ", header=None)
+# Latitude and Longitude of R001
+LonR_ref = pd.read_csv('Data/LON_R001.TXT', sep=" ", header=None)
+LatR_ref = pd.read_csv('Data/LAT_R001.TXT', sep=" ", header=None)
+# Rainfall Rate Exceeded for 0.01% of an Average Year
+R001 = pd.read_csv('Data/R001.TXT', sep=" ", header=None)
 
 # Auxiliary Calculations
 
 LonMT_T = LonMT.transpose()
 LonT_T = LonT.transpose()
+LonR_ref_T = LonR_ref.transpose()
 
 LatMT_c = LatMT[0].tolist()
 LonMT_c = LonMT_T[0].tolist()
 
 LatT_c = LatT[0].tolist()
 LonT_c = LonT_T[0].tolist()
+
+LatR_ref_c = LatR_ref[0].tolist()
+LonR_ref_c = LonR_ref_T[0].tolist()
 
 T_Data = [TJan, TFeb, TMar, TApr, TMay, TJun, TJul, TAug, TSep, TOct, TNov, TDec]
 MT_Data = [MTJan, MTFeb, MTMar, MTApr, MTMay, MTJun, MTJul, MTAug, MTSep, MTOct, MTNov, MTDec]
@@ -62,15 +66,21 @@ print("Enter your desired latitude")
 lat = float(input())
 print("Enter your desired longitude")
 lon = float(input())
+print("Enter your desired probability")
+p = float(input())
 
 # Step 1
+
+# Time of the month selection
+now = datetime.datetime.now()
+month = now.month - 1
 
 Nii = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 # Step 2
 
 # Longitude T
-LonMT_CV = min(LonT_c, key=lambda x: abs(x-lon))
+LonMT_CV = min(LonT_c, key=lambda x: abs(x - lon))
 T_pos_lon = LonT_c.index(LonMT_CV)
 
 T_aux_1 = LonMT_CV - lon
@@ -90,7 +100,7 @@ print("The closest numbers to", lon, "are:", TLon_L, "and", TLon_R, "and their p
       T_pos_lon_l, "and", T_pos_lon_r)
 
 # Latitude T
-LatMT_CV = min(LonT_c, key=lambda x: abs(x-lat))
+LatMT_CV = min(LonT_c, key=lambda x: abs(x - lat))
 T_pos_lat = LatT_c.index(LatMT_CV)
 
 T_aux_2 = LatMT_CV - lat
@@ -109,25 +119,33 @@ else:
 print("The closest numbers to", lat, "are:", TLat_B, "and", TLat_T, "and their positions are",
       T_pos_lat_b, "and", T_pos_lat_t)
 
-T_i1 = T_Data[month-1].loc[T_pos_lat_b, T_pos_lon_l]
-T_i2 = T_Data[month-1].loc[T_pos_lat_t, T_pos_lon_l]
-T_i3 = T_Data[month-1].loc[T_pos_lat_b, T_pos_lon_r]
-T_i4 = T_Data[month-1].loc[T_pos_lat_t, T_pos_lon_r]
+T_i1 = [0] * 12
+T_i2 = [0] * 12
+T_i3 = [0] * 12
+T_i4 = [0] * 12
+Tii = [0] * 12
 
-T_t = (lat - TLat_B)/(TLat_T-TLat_B)
-T_s = (lon - TLon_L)/(TLon_R - TLon_L)
+T_t = (lat - TLat_B) / (TLat_T - TLat_B)
+T_s = (lon - TLon_L) / (TLon_R - TLon_L)
 
-# Final value of T
-TF = (1 - T_s)*(1 - T_t)*T_i1 + (1 - T_s)*T_t*T_i2 + T_s*(1 - T_t)*T_i3 + T_t*T_s*T_i4
+for aux_month_t in range(0, 12):
 
-print("T = ", TF, "K")
+    T_i1[aux_month_t] = T_Data[aux_month_t].loc[T_pos_lat_b, T_pos_lon_l]
+    T_i2[aux_month_t] = T_Data[aux_month_t].loc[T_pos_lat_t, T_pos_lon_l]
+    T_i3[aux_month_t] = T_Data[aux_month_t].loc[T_pos_lat_b, T_pos_lon_r]
+    T_i4[aux_month_t] = T_Data[aux_month_t].loc[T_pos_lat_t, T_pos_lon_r]
 
-print("It's Surrounding values are:", T_i2, T_i3, T_i1, T_i4)
+    Tii[aux_month_t] = ((1 - T_s) * (1 - T_t) * T_i1[aux_month_t] + (1 - T_s) * T_t * T_i2[aux_month_t] +
+                        T_s * (1 - T_t) * T_i3[aux_month_t] + T_t * T_s * T_i4[aux_month_t])
+
+print("T = ", Tii[month], "K")
+
+print("It's Surrounding values are:", T_i2[month], T_i3[month], T_i1[month], T_i4[month])
 
 # Step 3
 
 # Longitude MT
-LonMT_CV = min(LonMT_c, key=lambda x: abs(x-lon))
+LonMT_CV = min(LonMT_c, key=lambda x: abs(x - lon))
 MT_pos_lon = LonMT_c.index(LonMT_CV)
 
 MT_aux_1 = LonMT_CV - lon
@@ -144,7 +162,7 @@ else:
     MTLon_L = LonMT_c[MT_pos_lon_l]
 
 # Latitude MT
-LatMT_CV = min(LonMT_c, key=lambda x: abs(x-lat))
+LatMT_CV = min(LonMT_c, key=lambda x: abs(x - lat))
 MT_pos_lat = LatMT_c.index(LatMT_CV)
 
 MT_aux_2 = LatMT_CV - lat
@@ -160,86 +178,97 @@ else:
     MTLat_T = LatMT_c[MT_pos_lat_t]
     MTLat_B = LatMT_c[MT_pos_lat_b]
 
-MT_i1 = MT_Data[month-1].loc[MT_pos_lat_b, MT_pos_lon_l]
-MT_i2 = MT_Data[month-1].loc[MT_pos_lat_t, MT_pos_lon_l]
-MT_i3 = MT_Data[month-1].loc[MT_pos_lat_b, MT_pos_lon_r]
-MT_i4 = MT_Data[month-1].loc[MT_pos_lat_t, MT_pos_lon_r]
+MT_i1 = [0] * 12
+MT_i2 = [0] * 12
+MT_i3 = [0] * 12
+MT_i4 = [0] * 12
+MTii = [0]*12
 
-MT_t = (lat - MTLat_B)/(MTLat_T-MTLat_B)
-MT_s = (lon - MTLon_L)/(MTLon_R - MTLon_L)
+MT_t = (lat - MTLat_B) / (MTLat_T - MTLat_B)
+MT_s = (lon - MTLon_L) / (MTLon_R - MTLon_L)
 
-# Final value of MT
-MTF = (1 - MT_s)*(1 - MT_t)*MT_i1 + (1 - MT_s)*MT_t*MT_i2 + MT_s*(1 - MT_t)*MT_i3 + MT_t*MT_s*MT_i4
+for aux_month_mt in range(0, 12):
 
-print("MT = ", MTF)
+    MT_i1[aux_month_mt] = MT_Data[aux_month_mt].loc[MT_pos_lat_b, MT_pos_lon_l]
+    MT_i2[aux_month_mt] = MT_Data[aux_month_mt].loc[MT_pos_lat_t, MT_pos_lon_l]
+    MT_i3[aux_month_mt] = MT_Data[aux_month_mt].loc[MT_pos_lat_b, MT_pos_lon_r]
+    MT_i4[aux_month_mt] = MT_Data[aux_month_mt].loc[MT_pos_lat_t, MT_pos_lon_r]
 
-print("It's Surrounding values are:", MT_i2, MT_i3, MT_i1, MT_i4)
+    MTii[aux_month_mt] = ((1 - MT_s) * (1 - MT_t) * MT_i1[aux_month_mt] + (1 - MT_s) * MT_t * MT_i2[aux_month_mt] +
+                          MT_s * (1 - MT_t) * MT_i3[aux_month_mt] + MT_t * MT_s * MT_i4[aux_month_mt])
+
+print("MT = ", MTii[month])
+
+print("It's Surrounding values are:", MT_i2[month], MT_i3[month], MT_i1[month], MT_i4[month])
 
 # Step 4
 
-tii = TF - 273.15
-print("tii = ", tii, "°C")
+tii = [0] * 12
+
+for aux_temp in range(0, 12):
+    tii[aux_temp] = Tii[aux_temp] - 273.15
+
+print("tii = ", tii[month], "°C")
 
 # Step 5
 
-if tii >= 0:
-    rii = 0.5874*exp(0.0883*tii)
-else:
-    rii = 0.5874
+rii = [0]*12
 
-print("rii = ", rii)
+for aux_rii in range(0, 12):
+    if tii[aux_rii] >= 0:
+        rii[aux_rii] = 0.5874 * exp(0.0883 * tii[aux_rii])
+    else:
+        rii[aux_rii] = 0.5874
+
+print("rii = ", rii[month])
 
 # Step 6a
 
-T_i1_1 = [0] * 12
-T_i2_1 = [0] * 12
-T_i3_1 = [0] * 12
-T_i4_1 = [0] * 12
-Tii = [0] * 12
-
-MT_i1_1 = [0] * 12
-MT_i2_1 = [0] * 12
-MT_i3_1 = [0] * 12
-MT_i4_1 = [0] * 12
-MTii = [0] * 12
 rii = [0] * 12
 P0ii = [0] * 12
 
 for aux_month in range(0, 12):
-
-    T_i1_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_b, T_pos_lon_l]
-    T_i2_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_t, T_pos_lon_l]
-    T_i3_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_b, T_pos_lon_r]
-    T_i4_1[aux_month] = T_Data[aux_month].loc[T_pos_lat_t, T_pos_lon_r]
-    
-    MT_i1_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_b, MT_pos_lon_l]
-    MT_i2_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_t, MT_pos_lon_l]
-    MT_i3_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_b, MT_pos_lon_r]
-    MT_i4_1[aux_month] = MT_Data[aux_month].loc[MT_pos_lat_t, MT_pos_lon_r]
-
-    Tii[aux_month] = ((1 - T_s) * (1 - T_t) * T_i1_1[aux_month] + (1 - T_s) * T_t * T_i2_1[aux_month] +
-                      T_s * (1 - T_t) * T_i3_1[aux_month] + T_t * T_s * T_i4_1[aux_month]) - 273.15
-    
-    MTii[aux_month] = ((1 - MT_s) * (1 - MT_t) * MT_i1_1[aux_month] + (1 - MT_s) * MT_t * MT_i2_1[aux_month] +
-                       MT_s * (1 - MT_t) * MT_i3_1[aux_month] + MT_t * MT_s * MT_i4_1[aux_month])
-
-    if Tii[aux_month] >= 0:
-        rii[aux_month] = 0.5874*exp(0.0883*Tii[aux_month])
+    if tii[aux_month] >= 0:
+        rii[aux_month] = 0.5874 * exp(0.0883 * tii[aux_month])
     else:
         rii[aux_month] = 0.5874
 
     P0ii[aux_month] = (100 * MTii[aux_month]) / (24 * Nii[aux_month] * rii[aux_month])
 
-print(Tii[month-1])
+print("New Tii", Tii[month])
 
-print(MTii[month-1])
+print("New MTii", MTii[month])
 
-print(rii[month-1])
+print("rii = ", rii)
 
-print(P0ii[month-1])
+print("P0ii = ", P0ii)
 
 # Step 6b
+for aux_month_1 in range(0, 12):
+    if P0ii[aux_month_1] > 70:
+        P0ii[aux_month_1] = 70
+        rii[aux_month_1] = (100*MTii[aux_month_1])/(70*24*Nii[aux_month_1])
 
-P0an = [0]*12
+print("rii = ", rii)
+print("P0ii = ", P0ii)
 
-# for aux_month_1 in range (0,12):
+# Step 7
+
+aux_s7_1 = [0]*12
+aux_s7_2 = [0]*12
+
+for aux_month_2 in range(0, 12):
+    aux_s7_1[aux_month_2] = Nii[aux_month_2]*P0ii[aux_month_2]
+
+aux_s7_2 = sum(aux_s7_1)
+P0an = aux_s7_2 / 365.25
+print("P0annual = ", P0an)
+
+# Step 8
+
+
+"""
+if p > P0an:
+    Rp = 0
+else:
+"""
