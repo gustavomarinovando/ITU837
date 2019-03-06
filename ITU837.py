@@ -54,11 +54,12 @@ LonMT_c = LonMT_T[0].tolist()
 LatT_c = LatT[0].tolist()
 LonT_c = LonT_T[0].tolist()
 
-LatR_ref_c = LatR_ref[0].tolist()
-LonR_ref_c = LonR_ref_T[0].tolist()
+LatR_c = LatR_ref[0].tolist()
+LonR_c = LonR_ref_T[0].tolist()
 
 T_Data = [TJan, TFeb, TMar, TApr, TMay, TJun, TJul, TAug, TSep, TOct, TNov, TDec]
 MT_Data = [MTJan, MTFeb, MTMar, MTApr, MTMay, MTJun, MTJul, MTAug, MTSep, MTOct, MTNov, MTDec]
+R_Data = R001
 
 # Data Input
 
@@ -85,7 +86,7 @@ T_pos_lon = LonT_c.index(LonMT_CV)
 
 T_aux_1 = LonMT_CV - lon
 
-if T_aux_1 > 0:
+if T_aux_1 >= 0:
     T_pos_lon_r = T_pos_lon
     T_pos_lon_l = T_pos_lon - 1
     TLon_R = LonT_c[T_pos_lon_r]
@@ -96,16 +97,16 @@ else:
     TLon_R = LonT_c[T_pos_lon_r]
     TLon_L = LonT_c[T_pos_lon_l]
 
-print("The closest numbers to", lon, "are:", TLon_L, "and", TLon_R, "and their positions are",
-      T_pos_lon_l, "and", T_pos_lon_r)
+# print("The closest numbers to", lon, "are:", TLon_L, "and", TLon_R, "and their positions are",
+#      T_pos_lon_l, "and", T_pos_lon_r)
 
 # Latitude T
-LatMT_CV = min(LonT_c, key=lambda x: abs(x - lat))
+LatMT_CV = min(LatT_c, key=lambda x: abs(x - lat))
 T_pos_lat = LatT_c.index(LatMT_CV)
 
 T_aux_2 = LatMT_CV - lat
 
-if T_aux_2 > 0:
+if T_aux_2 >= 0:
     T_pos_lat_t = T_pos_lat
     T_pos_lat_b = T_pos_lat - 1
     TLat_T = LatT_c[T_pos_lat_t]
@@ -116,8 +117,8 @@ else:
     TLat_T = LatT_c[T_pos_lat_t]
     TLat_B = LatT_c[T_pos_lat_b]
 
-print("The closest numbers to", lat, "are:", TLat_B, "and", TLat_T, "and their positions are",
-      T_pos_lat_b, "and", T_pos_lat_t)
+# print("The closest numbers to", lat, "are:", TLat_B, "and", TLat_T, "and their positions are",
+#      T_pos_lat_b, "and", T_pos_lat_t)
 
 T_i1 = [0] * 12
 T_i2 = [0] * 12
@@ -138,6 +139,7 @@ for aux_month_t in range(0, 12):
     Tii[aux_month_t] = ((1 - T_s) * (1 - T_t) * T_i1[aux_month_t] + (1 - T_s) * T_t * T_i2[aux_month_t] +
                         T_s * (1 - T_t) * T_i3[aux_month_t] + T_t * T_s * T_i4[aux_month_t])
 
+print("\nStep 2. Value of Temperature for this month")
 print("T = ", Tii[month], "K")
 
 print("It's Surrounding values are:", T_i2[month], T_i3[month], T_i1[month], T_i4[month])
@@ -162,7 +164,7 @@ else:
     MTLon_L = LonMT_c[MT_pos_lon_l]
 
 # Latitude MT
-LatMT_CV = min(LonMT_c, key=lambda x: abs(x - lat))
+LatMT_CV = min(LatMT_c, key=lambda x: abs(x - lat))
 MT_pos_lat = LatMT_c.index(LatMT_CV)
 
 MT_aux_2 = LatMT_CV - lat
@@ -196,7 +198,7 @@ for aux_month_mt in range(0, 12):
 
     MTii[aux_month_mt] = ((1 - MT_s) * (1 - MT_t) * MT_i1[aux_month_mt] + (1 - MT_s) * MT_t * MT_i2[aux_month_mt] +
                           MT_s * (1 - MT_t) * MT_i3[aux_month_mt] + MT_t * MT_s * MT_i4[aux_month_mt])
-
+print("\nStep 3. Value of MT for this month")
 print("MT = ", MTii[month])
 
 print("It's Surrounding values are:", MT_i2[month], MT_i3[month], MT_i1[month], MT_i4[month])
@@ -208,6 +210,7 @@ tii = [0] * 12
 for aux_temp in range(0, 12):
     tii[aux_temp] = Tii[aux_temp] - 273.15
 
+print("\nStep 4. Temperature from K to °C")
 print("tii = ", tii[month], "°C")
 
 # Step 5
@@ -220,37 +223,29 @@ for aux_rii in range(0, 12):
     else:
         rii[aux_rii] = 0.5874
 
+print("\nStep 5. Value of Rii")
 print("rii = ", rii[month])
 
 # Step 6a
 
-rii = [0] * 12
 P0ii = [0] * 12
 
-for aux_month in range(0, 12):
-    if tii[aux_month] >= 0:
-        rii[aux_month] = 0.5874 * exp(0.0883 * tii[aux_month])
-    else:
-        rii[aux_month] = 0.5874
+for aux_p0ii in range(0, 12):
+    P0ii[aux_p0ii] = (100 * MTii[aux_p0ii]) / (24 * Nii[aux_p0ii] * rii[aux_p0ii])
 
-    P0ii[aux_month] = (100 * MTii[aux_month]) / (24 * Nii[aux_month] * rii[aux_month])
-
-print("New Tii", Tii[month])
-
-print("New MTii", MTii[month])
-
-print("rii = ", rii)
-
-print("P0ii = ", P0ii)
+print("\nStep 6a. Value of P0ii for this month")
+print("P0ii = ", P0ii[month], "%")
 
 # Step 6b
+
 for aux_month_1 in range(0, 12):
     if P0ii[aux_month_1] > 70:
         P0ii[aux_month_1] = 70
         rii[aux_month_1] = (100*MTii[aux_month_1])/(70*24*Nii[aux_month_1])
 
-print("rii = ", rii)
-print("P0ii = ", P0ii)
+print("\nStep 6b. New Values of P0ii and rii")
+print("rii = ", rii[month])
+print("P0ii = ", P0ii[month])
 
 # Step 7
 
@@ -260,15 +255,97 @@ aux_s7_2 = [0]*12
 for aux_month_2 in range(0, 12):
     aux_s7_1[aux_month_2] = Nii[aux_month_2]*P0ii[aux_month_2]
 
-aux_s7_2 = sum(aux_s7_1)
-P0an = aux_s7_2 / 365.25
-print("P0annual = ", P0an)
+P0an = sum(aux_s7_1) / sum(Nii)
+
+print("\nStep 7. Value of P0 annual")
+print("P0annual = ", P0an, "%")
 
 # Step 8
 
+# Longitude R001
 
-"""
+LonR_CV = min(LonR_c, key=lambda x: abs(x - lon))
+R_pos_lon = LonR_c.index(LonR_CV)
+
+R_aux_1 = LonR_CV - lon
+
+if R_aux_1 >= 0:
+    R_pos_lon_r = R_pos_lon
+    R_pos_lon_l = R_pos_lon - 1
+    RLon_R = LonR_c[R_pos_lon_r]
+    RLon_L = LonR_c[R_pos_lon_l]
+else:
+    R_pos_lon_l = R_pos_lon
+    R_pos_lon_r = R_pos_lon + 1
+    RLon_R = LonR_c[R_pos_lon_r]
+    RLon_L = LonR_c[R_pos_lon_l]
+
+# Latitude R001
+LatR_CV = min(LatR_c, key=lambda x: abs(x - lat))
+R_pos_lat = LatR_c.index(LatR_CV)
+
+R_aux_2 = LatR_CV - lat
+
+if R_aux_2 >= 0:
+    R_pos_lat_t = R_pos_lat
+    R_pos_lat_b = R_pos_lat - 1
+    RLat_T = LatR_c[R_pos_lat_t]
+    RLat_B = LatR_c[R_pos_lat_b]
+else:
+    R_pos_lat_b = R_pos_lat
+    R_pos_lat_t = R_pos_lat + 1
+    RLat_T = LatR_c[R_pos_lat_t]
+    RLat_B = LatR_c[R_pos_lat_b]
+
+R_t = (lat - RLat_B) / (RLat_T - RLat_B)
+R_s = (lon - RLon_L) / (RLon_R - RLon_L)
+
+R_i1 = R_Data.loc[R_pos_lat_b, R_pos_lon_l]
+R_i2 = R_Data.loc[R_pos_lat_t, R_pos_lon_l]
+R_i3 = R_Data.loc[R_pos_lat_b, R_pos_lon_r]
+R_i4 = R_Data.loc[R_pos_lat_t, R_pos_lon_r]
+
+R_ref = ((1 - R_s) * (1 - R_t) * R_i1 + (1 - R_s) * R_t * R_i2 +
+         R_s * (1 - R_t) * R_i3 + R_t * R_s * R_i4)
+
+print("\nR_ref = ", R_ref, "mm/h")
+
+print("It's Surrounding values are:", R_i2, R_i3, R_i1, R_i4)
+
+aux_s8_1 = [0]*12
+aux_s8_2 = [0]*12
+aux_s8_3 = [0]*12
+Pii = [0]*12
+
+for aux_step8 in range(0, 12):
+    aux_s8_1[aux_step8] = (log(R_ref)+0.7938-log(rii[aux_step8]))/1.26
+    Pii[aux_step8] = 0.5*P0ii[aux_step8]*erfc(aux_s8_1[aux_step8]/sqrt(2))
+    aux_s8_2[aux_step8] = Nii[aux_step8]*Pii[aux_step8]
+
+P = sum(aux_s8_2) / sum(Nii)
+print("\nP(R>R_ref) = ", P)
+
+rel_er = 100 * abs((P / p)-1)
+print("\nRelative error = ", rel_er)
+
 if p > P0an:
     Rp = 0
 else:
-"""
+    R_low = 0
+    R_high = 500
+    while rel_er > 1e-3:
+        if P < p:
+            R_high = R_ref
+        else:
+            R_low = R_ref
+        R_ref = (R_low + R_high)/2
+        for aux_ref in range(0, 12):
+            aux_s8_1[aux_ref] = (log(R_ref) + 0.7938 - log(rii[aux_ref])) / 1.26
+            Pii[aux_ref] = 0.5 * P0ii[aux_ref] * erfc(aux_s8_1[aux_ref] / sqrt(2))
+            aux_s8_3[aux_ref] = Nii[aux_ref] * Pii[aux_ref]
+        P = sum(aux_s8_3) / sum(Nii)
+        rel_er = 100 * abs((P / p) - 1)
+    Rp = R_ref
+print("The value of Rp is: ", Rp)
+print("Final Relative Error is", rel_er)
+
